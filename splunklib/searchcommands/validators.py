@@ -242,6 +242,53 @@ class Duration(Validator):
     _unsigned = Integer(0)
 
 
+class TimeSpan(validators.Validator):
+    """ Validates a time span option using Splunk's relative time modifieres 
+    
+    Supports a modifiers listed here.
+    https://docs.splunk.com/Documentation/Splunk/7.2.0/SearchReference/SearchTimeModifiers
+    Right only single character versions are accepted.
+    Snapping (@) is NOT supported.
+    Compound times not current supported:   Doesn't handle "7d4h" 
+    """
+    spansuffix = namedtuple("spansuffix", ("multiplier", "friendly_name"))
+    pattern = re.compile(r"(\d+)([dhms]?)")
+    suffix_map = {
+        "s" : spansuffix(1, "seconds"),
+        "m" : spansuffix(60, "minutes"),
+        "h" : spansuffix(3600, "hours"),
+        "d" : spansuffix(86400, "days"),
+    }
+    del spansuffix
+
+    def __call__(self, value):
+        if value is None:
+            return None
+        m = self.pattern.match(value)
+        if m is None:
+            raise ValueError("Unsupported span value: '{0}'  "
+                             "Supports formats like '7d', '2h', and '15m'".format(value))
+        v, suffix = m.groups()
+        try:
+            v = int(v)
+        except ValueError:
+            raise ValueError("Time span must be positive.  Unsupported value: '{0}'".format(value))
+        if not suffix:
+            suffix = "s"
+        spansfx = self.suffix_map[suffix]
+        return v * spansfx.multiplier
+
+    def format(self, value):
+        if value is None:
+            return None
+        rev_map = [ (s.multiplier, s) for s in self.suffix_map.values() ]
+        for (threshold, s) in sorted(rev_map, reverse=True):
+            if (value % threshold) == 0:
+                prefix = value / threshold
+                return u"{0} {1}".format(prefix, s.friendly_name)
+        return unicode(value)
+
+
 class List(Validator):
     """ Validates a list of strings
 
