@@ -1,18 +1,36 @@
+Splunk SDK for Python
+=====================
+
 Welcome to the API reference for the Splunk SDK for Python, which describes the modules that are included in the SDK.
 For more information, see the `Splunk Developer Portal <http://dev.splunk.com/view/python-sdk/SP-CAAAEBB>`_.
 
 .. toctree::
    :maxdepth: 2
+   :name: SDK for Python
+   :caption: Introduction
+
+   architecture
+   branching_model
+   faq
+   contact_us
+
+.. toctree::
+   :maxdepth: 2
    :name: SDK for Python API Reference
+   :caption: Reference
+   :hidden:
 
    binding
-   client
    data
+   client
    results
    modularinput
    searchcommands
    searchcommandsvalidators
 
+
+Python Index
+============
 
 :doc:`binding`
 --------------
